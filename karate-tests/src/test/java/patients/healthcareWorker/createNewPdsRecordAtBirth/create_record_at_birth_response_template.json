@@ -1,20 +1,18 @@
 {
-    "address": [
+    "address": "##[] addressSchema",
+    "birthDate": "##? utils.isValidDateString(_)",
+    "gender": "##regex(male|female|other|unknown)",
+    "id": "#(nhsNumber)",
+    "extension": [
         {
-            "id": "CC19E3F3",
-            "line": [
-                "08695 Paucek Fall"
-            ],
-            "period": {
-                "start": "2024-05-01"
-            },
-            "postalCode": "AX8R9WC",
-            "use": "home"
+            "url": "http://hl7.org/fhir/StructureDefinition/patient-birthPlace",
+            "valueAddress": {
+                "city": "##string",
+                "country": "##string",
+                "district": "##string"
+            }
         }
     ],
-    "birthDate": "1955-11-05",
-    "gender": "male",
-    "id": "5900043320",
     "identifier": [
         {
             "extension": [
@@ -33,7 +31,7 @@
                 }
             ],
             "system": "https://fhir.nhs.uk/Id/nhs-number",
-            "value": "5900043320"
+            "value": "#(nhsNumber)"
         }
     ],
     "meta": {
@@ -44,21 +42,19 @@
                 "system": "http://terminology.hl7.org/CodeSystem/v3-Confidentiality"
             }
         ],
-        "versionId": "3"
+        "versionId": "1"
     },
+    "multipleBirthInteger": "#(babyBirthOrder)",
     "name": [
         {
-            "family": "Karate-test-ycaufnq",
-            "given": [
-                "Zebedee"
-            ],
-            "id": "B6B94463",
+            "id": "#string",
+            "family": "#(familyName)",
+            "given": "#(babyGivenName)",
+            "prefix": "##[] #string",
+            "suffix": "##[] #string",
             "period": {
-                "start": "2024-05-01"
+                "start": "##? utils.isValidDateString(_)"
             },
-            "prefix": [
-                "Mr"
-            ],
             "use": "usual"
         }
     ],

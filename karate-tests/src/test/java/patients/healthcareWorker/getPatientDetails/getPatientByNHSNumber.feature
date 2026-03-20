@@ -18,19 +18,19 @@ Background:
   * json Patient = karate.readAsString('classpath:schemas/Patient.json')
 
   # auth
-  * def accessToken = karate.callSingle('classpath:auth/auth-redirect.feature').accessToken
-  * def requestHeaders = call read('classpath:auth/auth-headers.js')
-  * configure headers = requestHeaders 
+  * def aal2_user_ID = '656005750109'
+  * def intNhsNumber = '9693632109'
+  * def sandboxNhsNumber = '9000000009'
 
   * url baseURL
 
 @unrestricted @smoke
 Scenario: Get an "unrestricted" patient
-  * def nhsNumber = karate.env.includes('sandbox') ? '9000000009' : '9693632109'
-  * path 'Patient', nhsNumber
-  * method get
-  * status 200
-  * assert utils.validateResponseHeaders(requestHeaders, responseHeaders)
+  * def accessToken = karate.call('classpath:auth/auth-redirect.feature').accessToken
+  * def requestHeaders = call read('classpath:auth/auth-headers.js')
+  * configure headers = requestHeaders 
+  * def nhsNumber = karate.env.includes('sandbox') ? sandboxNhsNumber : intNhsNumber
+  * call read('classpath:patients/common/getPatientByNHSNumber.feature@getPatientByNhsNumber'){ nhsNumber:"#(nhsNumber)", expectedStatus: 200 }
   * match response.id == nhsNumber
   * match response == Patient
   * match response.meta.security[0] ==
@@ -46,11 +46,11 @@ Scenario: Get an "unrestricted" patient
 
 @sensitive
 Scenario: Get a "restricted" (sensitive) patient
+  * def accessToken = karate.call('classpath:auth/auth-redirect.feature').accessToken
+  * def requestHeaders = call read('classpath:auth/auth-headers.js')
+  * configure headers = requestHeaders 
   * def nhsNumber = karate.env.includes('sandbox') ? '9000000025' : '9727022820'
-  * path 'Patient', nhsNumber
-  * method get
-  * status 200
-  * assert utils.validateResponseHeaders(requestHeaders, responseHeaders)
+  * call read('classpath:patients/common/getPatientByNHSNumber.feature@getPatientByNhsNumber'){ nhsNumber:"#(nhsNumber)", expectedStatus: 200 }
   * match response.id == nhsNumber
   * match response == Patient
   * match response.address == '#notpresent'
@@ -64,10 +64,17 @@ Scenario: Get a "restricted" (sensitive) patient
     }
     """
    
-  Scenario: Get an "invalid" patient
-    * def nhsNumber = '9000000000'
-    * def expectedBody = read('classpath:mocks/stubs/errorResponses/INVALID_RESOURCE_ID.json')
-    * path 'Patient', nhsNumber
-    * method get
-    * status 400
-    * match response == expectedBody
+Scenario: Get an "invalid" patient
+  * def accessToken = karate.call('classpath:auth/auth-redirect.feature').accessToken
+  * def requestHeaders = call read('classpath:auth/auth-headers.js')
+  * configure headers = requestHeaders 
+  * call read('classpath:patients/common/getPatientByNHSNumber.feature@invalidResource')
+
+Scenario: Allow Healthcare Worker Access with AAL2
+    * def accessToken = karate.call('classpath:auth/auth-redirect.feature', {userID: aal2_user_ID}).accessToken
+    * def requestHeaders = call read('classpath:auth/auth-headers.js')
+    * configure headers = requestHeaders 
+    * def nhsNumber = karate.env.includes('sandbox') ? sandboxNhsNumber : intNhsNumber
+    * call read('classpath:patients/common/getPatientByNHSNumber.feature@getPatientByNhsNumber'){ nhsNumber:"#(nhsNumber)", expectedStatus: 200 }
+    * match response.id == nhsNumber
+    * match response == Patient

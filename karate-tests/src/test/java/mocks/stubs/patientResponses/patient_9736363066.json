@@ -1,0 +1,82 @@
+{
+    "address": [
+        {
+            "id": "yFGCr",
+            "line": [
+                "1 SCHOOL ROAD",
+                "WINTERINGHAM",
+                "SCUNTHORPE"
+            ],
+            "period": {
+                "start": "2017-10-26"
+            },
+            "postalCode": "DN15 9NL",
+            "use": "home"
+        }
+    ],
+    "birthDate": "1933-02-25",
+    "gender": "unknown",
+    "generalPractitioner": [
+        {
+            "id": "JZMVX",
+            "identifier": {
+                "period": {
+                    "start": "1942-08-09"
+                },
+                "system": "https://fhir.nhs.uk/Id/ods-organization-code",
+                "value": "A20047"
+            },
+            "type": "Organization"
+        }
+    ],
+    "id": "9736363066",
+    "identifier": [
+        {
+            "extension": [
+                {
+                    "url": "https://fhir.hl7.org.uk/StructureDefinition/Extension-UKCore-NHSNumberVerificationStatus",
+                    "valueCodeableConcept": {
+                        "coding": [
+                            {
+                                "code": "01",
+                                "display": "Number present and verified",
+                                "system": "https://fhir.hl7.org.uk/CodeSystem/UKCore-NHSNumberVerificationStatus",
+                                "version": "1.0.0"
+                            }
+                        ]
+                    }
+                }
+            ],
+            "system": "https://fhir.nhs.uk/Id/nhs-number",
+            "value": "9736363066"
+        }
+    ],
+    "meta": {
+        "security": [
+            {
+                "code": "U",
+                "display": "unrestricted",
+                "system": "http://terminology.hl7.org/CodeSystem/v3-Confidentiality"
+            }
+        ],
+        "versionId": "3"
+    },
+    "name": [
+        {
+            "family": "WEAVER",
+            "given": [
+                "Randal",
+                "Gerald"
+            ],
+            "id": "xWaWS",
+            "period": {
+                "start": "2002-07-31"
+            },
+            "prefix": [
+                "MR"
+            ],
+            "use": "usual"
+        }
+    ],
+    "resourceType": "Patient"
+}

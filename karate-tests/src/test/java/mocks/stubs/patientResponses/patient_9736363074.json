@@ -1,0 +1,82 @@
+{
+    "address": [
+        {
+            "id": "HZLcX",
+            "line": [
+                "10 MAGDALEN CLOSE",
+                "SCUNTHORPE",
+                "S HUMBERSIDE"
+            ],
+            "period": {
+                "start": "1999-01-26"
+            },
+            "postalCode": "DN16 3NA",
+            "use": "home"
+        }
+    ],
+    "birthDate": "1955-11-05",
+    "gender": "male",
+    "generalPractitioner": [
+        {
+            "id": "jownT",
+            "identifier": {
+                "period": {
+                    "start": "2009-09-02"
+                },
+                "system": "https://fhir.nhs.uk/Id/ods-organization-code",
+                "value": "A20047"
+            },
+            "type": "Organization"
+        }
+    ],
+    "id": "9736363074",
+    "identifier": [
+        {
+            "extension": [
+                {
+                    "url": "https://fhir.hl7.org.uk/StructureDefinition/Extension-UKCore-NHSNumberVerificationStatus",
+                    "valueCodeableConcept": {
+                        "coding": [
+                            {
+                                "code": "01",
+                                "display": "Number present and verified",
+                                "system": "https://fhir.hl7.org.uk/CodeSystem/UKCore-NHSNumberVerificationStatus",
+                                "version": "1.0.0"
+                            }
+                        ]
+                    }
+                }
+            ],
+            "system": "https://fhir.nhs.uk/Id/nhs-number",
+            "value": "9736363074"
+        }
+    ],
+    "meta": {
+        "security": [
+            {
+                "code": "U",
+                "display": "unrestricted",
+                "system": "http://terminology.hl7.org/CodeSystem/v3-Confidentiality"
+            }
+        ],
+        "versionId": "3"
+    },
+    "name": [
+        {
+            "family": "WILCOX",
+            "given": [
+                "Arthur",
+                "Mathew"
+            ],
+            "id": "pnmOI",
+            "period": {
+                "start": "2000-07-25"
+            },
+            "prefix": [
+                "MR"
+            ],
+            "use": "usual"
+        }
+    ],
+    "resourceType": "Patient"
+}

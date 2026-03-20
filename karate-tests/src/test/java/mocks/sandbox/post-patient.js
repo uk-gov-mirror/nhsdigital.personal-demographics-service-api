@@ -12,7 +12,7 @@
 
 function generateObjectId () {
   // generates a random ID for the name and address objects, e.g. 8F1A21BC
-  return Math.random().toString(16).substr(2, 8).toUpperCase()
+  return Math.random().toString(16).slice(2, 8).toUpperCase()
 }
 
 const NEW_PATIENT = context.read('classpath:mocks/stubs/postPatientResponses/new_patient.json')
@@ -80,8 +80,8 @@ function postPatientRequestIsValid (request) {
     {
       condition: Array.isArray(request.body?.address?.[0]),
       diagnostics: `Invalid value - '${JSON.stringify(request.body?.address?.[0] || {})
-  .replace(/"/g, "'")
-  .replace(/','/g, "', '")}' in field 'address/0'`,
+  .replaceAll('"', "'")
+  .replaceAll("','", "', '")}' in field 'address/0'`,
       type: 'invalid'
     },
     {
