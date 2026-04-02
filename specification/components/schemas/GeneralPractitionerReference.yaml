@@ -1,4 +1,4 @@
-description: General practice (not practitioner) with which the patient is or was registered. 
+description: General practice (not practitioner) with which the patient is registered. 
 type: object
 required:
   - identifier
