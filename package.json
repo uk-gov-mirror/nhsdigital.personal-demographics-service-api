@@ -72,7 +72,11 @@
         "minimatch": "9.0.9"
       }
     },
-    "handlebars": "4.7.9"
+    "handlebars": "4.7.9",
+    "picomatch": "2.3.2",
+    "jest-util": {
+      "picomatch": "4.0.4"
+    }
   },
   "type": "module"
 }
