@@ -369,7 +369,7 @@
             ],
             "member": {
               "identifier": {
-                "system": "https://fhir.nhs.uk/Id/ods-organization-code",
+                "system": "urn:oid:1.2.826.0.1285.0.1.10",
                 "value": "RCB55"
               }
             }

@@ -32,11 +32,24 @@ Feature: Create a new PDS record at birth
     * def requestHeaders = call read('classpath:auth/auth-headers.js')
     * configure headers = requestHeaders 
     * call read('classpath:patients/common/createNewPdsRecordAtBirth.feature@createRecordAtBirth ') { expectedStatus: 201 }
-    * def nhsNumber = response.id
+    * def nhsNumber = response.entry[0].resource.id
     * def expectedResponse = read('classpath:patients/healthcareWorker/createNewPdsRecordAtBirth/create_record_at_birth_response_template.json')
     * match response == expectedResponse
-    * match response.address[0].line[0] == address.line[1]
+    * match response.entry[0].resource.address[0].line[0] == address.line[1]
     * match responseHeaders['notification-id'] == '#present'
+    #  Validate relationship on Child's record
+    * def requestHeaders = call read('classpath:auth/auth-headers.js')
+    * configure headers = requestHeaders
+    * call read('classpath:patients/common/getPatientsRelatedPerson.feature@getRelatedPersonDetails') { nhsNumber: "#(nhsNumber)",expectedStatus:200 }
+    * match response.entry[0].resource.patient.identifier.value == motherNhsNumber
+    * match response.entry[0].resource.relationship[0].coding[0].code == "MTH"
+    # Validate relationship on mother's record too
+
+    * def requestHeaders = call read('classpath:auth/auth-headers.js')
+    * configure headers = requestHeaders
+    * call read('classpath:patients/common/getPatientsRelatedPerson.feature@getRelatedPersonDetails') { nhsNumber: "#(motherNhsNumber)",expectedStatus:200 }
+    * match response.entry[0].resource.relationship[0].coding[0].code == "CHILD"
+
 
   Scenario: Fail to create a record for a new patient, single demographics match found
     * def babyGender = utils.randomGender()
@@ -48,7 +61,7 @@ Feature: Create a new PDS record at birth
     * def requestHeaders = call read('classpath:auth/auth-headers.js')
     * configure headers = requestHeaders 
     * call read('classpath:patients/common/createNewPdsRecordAtBirth.feature@createRecordAtBirth') { expectedStatus: 201 }
-    * def nhsNumber = response.id
+    * def nhsNumber = response.entry[0].resource.id
    
     # second create at birth with same demographic details
     * def requestHeaders = call read('classpath:auth/auth-headers.js')
@@ -81,7 +94,7 @@ Feature: Create a new PDS record at birth
     * def requestHeaders = call read('classpath:auth/auth-headers.js')
     * configure headers = requestHeaders 
     * call read('classpath:patients/common/createNewPdsRecordAtBirth.feature@createRecordAtBirth') { expectedStatus: 201 }
-    * def nhsNumber = response.id
+    * def nhsNumber = response.entry[0].resource.id
      
     # different mothers NHS and different motherDOB - creating new mother nhs number and overriding global motherNhsNumber variables
 
@@ -95,14 +108,14 @@ Feature: Create a new PDS record at birth
     * def patientPayload = read('classpath:patients/healthcareWorker/createPatient/post-patient-request.json')
   
     * call read('classpath:patients/common/createPatient.feature@createPatient') { patientPayload:"#(patientPayload)", expectedStatus: 201 }
-    * def motherNhsNumber = response.id 
+    * def motherNhsNumber = response.entry[0].resource.id
     * def createRecordAtBirthPayload = read('classpath:patients/healthcareWorker/createNewPdsRecordAtBirth/create-pds-record-at-birth.json')   
      # second create at birth with different mother nhs number, mother dob and ignore_potential_matches=true
     * def requestHeaders = call read('classpath:auth/auth-headers.js')
     * configure headers = requestHeaders 
       # second create at birth with different mother nhs number, mother dob - creating new mother nhs number and overriding global motherNhsNumber variables
     * def createBabyResponse = call read('classpath:patients/common/createNewPdsRecordAtBirth.feature@createRecordAtBirth') { createRecordAtBirthPayload: "#(createRecordAtBirthPayload)", expectedStatus: 201, ignoreDuplicatesValue: true  }
-    * def nhsNumber2 = createBabyResponse.id
+    * def nhsNumber2 = createBabyResponse.entry[0].resource.id
  
     * def givenName = ["#(faker.givenName())", "#(faker.givenName())"]
     * def prefix = ["#(utils.randomPrefix())"]
@@ -404,11 +417,11 @@ Feature: Create a new PDS record at birth
     * def requestHeaders = call read('classpath:auth/auth-headers.js')
     * configure headers = requestHeaders 
     * call read('classpath:patients/common/createNewPdsRecordAtBirth.feature@createRecordAtBirth ') { createRecordAtBirthPayload: "#(createRecordAtBirthPayload)", expectedStatus: 201 }
-    * def nhsNumber = response.id
+    * def nhsNumber = response.entry[0].resource.id
     * match nhsNumber == '#notnull'
-    * match response.gender == babyGender
-    * match response.birthDate == babyBirthDate
-    * def deathNotification = karate.jsonPath(response, "$.extension[?(@.url=='https://fhir.hl7.org.uk/StructureDefinition/Extension-UKCore-DeathNotificationStatus')]")[0]
+    * match response.entry[0].resource.gender == babyGender
+    * match response.entry[0].resource.birthDate == babyBirthDate
+    * def deathNotification = karate.jsonPath(response, "$.entry[0].resource.extension[?(@.url=='https://fhir.hl7.org.uk/StructureDefinition/Extension-UKCore-DeathNotificationStatus')]")[0]
     * match deathNotification.extension[0].valueCodeableConcept.coding[0].code == stillbornCode
 
    Scenario: create PDS record at birth and check the response includes the ethnicity extension when the feature is enabled for the endpoint
@@ -421,11 +434,11 @@ Feature: Create a new PDS record at birth
     * def requestHeaders = call read('classpath:auth/auth-headers.js')
     * configure headers = requestHeaders 
     * call read('classpath:patients/common/createNewPdsRecordAtBirth.feature@createRecordAtBirth ') { expectedStatus: 201 }
-    * def nhsNumber = response.id
+    * def nhsNumber = response.entry[0].resource.id
     * def expectedResponse = read('classpath:patients/healthcareWorker/createNewPdsRecordAtBirth/create_record_at_birth_response_template.json')
     * match response == expectedResponse
     * match responseHeaders['notification-id'] == '#present'
-    * def newlyAllocatedNhsNumber = response.id
+    * def newlyAllocatedNhsNumber = response.entry[0].resource.id
 
     * def requestHeaders = call read('classpath:auth/auth-headers.js')
     * def odsCodeHeader = {'NHSD-End-User-Organisation-ODS': 'A20047'}
@@ -434,8 +447,64 @@ Feature: Create a new PDS record at birth
     * call read('classpath:patients/common/getPatientByNHSNumber.feature@getPatientByNhsNumber'){ expectedStatus: 200, nhsNumber:"#(newlyAllocatedNhsNumber)"}
     
     # ethnicity extension is enabled for asid:ODScode - 200000001215:A20047 
-    * def ethnicityExtension = karate.jsonPath(response, "$.extension[?(@.url==  'https://fhir.hl7.org.uk/StructureDefinition/Extension-UKCore-EthnicCategory' )]")[0]
+    * def ethnicityExtension = karate.jsonPath(response, "$.entry[0].resource.extension[?(@.url==  'https://fhir.hl7.org.uk/StructureDefinition/Extension-UKCore-EthnicCategory' )]")[0]
     * match ethnicityExtension != null
     * match ethnicityExtension.extension[0].url == '#present'
     * match ethnicityExtension.extension[0].url ==  'https://fhir.hl7.org.uk/StructureDefinition/Extension-UKCore-EthnicCategory' 
+ 
+  Scenario: create  PDS record at birth - Mother gender is male - response should still be 201 created and warning should be returned in the response body
+    # create a mother with male gender
+    * def givenName = ["#(faker.givenName())", "#(faker.givenName())"]
+    * def prefix = ["#(utils.randomPrefix())"]
+    * def gender = "male"
+    * def birthDate = utils.randomBirthDateBetween16And40()
+    * def randomAddress = utils.randomAddress(birthDate)
+    * def address = randomAddress
+    * configure headers = call read('classpath:auth/auth-headers.js')
+    * def patientPayload = read('classpath:patients/healthcareWorker/createPatient/post-patient-request.json')
   
+    * call read('classpath:patients/common/createPatient.feature@createPatient') { patientPayload:"#(patientPayload)", expectedStatus: 201 }
+    * def motherNhsNumber = response.id 
+
+    * def babyGender = utils.randomGender()
+    * def babyBirthDate = utils.randomNewbornDateLast5Days()
+    * def babyBirthTime = babyBirthDate + utils.randomTime()
+    * def babyBirthOrder = 1
+    * def babyBirthWeight = utils.randomBirthWeight()
+    * def babyGivenName = ["#(faker.givenName())", "#(faker.givenName())"]
+    * def requestHeaders = call read('classpath:auth/auth-headers.js')
+    * configure headers = requestHeaders 
+    * call read('classpath:patients/common/createNewPdsRecordAtBirth.feature@createRecordAtBirth ') { expectedStatus: 201 }
+    * def nhsNumber = response.entry[0].resource.id
+    # validate the warning in the response body
+    * def issues = response.entry[0].response.outcome.issue
+    * assert issues.length >= 1
+    * match issues[*].diagnostics contains "Failed to link to mother's record - mother's gender is male."
+
+    #  Validate relationship on Child's record - releationship shouldn't be created
+    * def requestHeaders = call read('classpath:auth/auth-headers.js')
+    * configure headers = requestHeaders
+    * call read('classpath:patients/common/getPatientsRelatedPerson.feature@getRelatedPersonDetails') { nhsNumber: "#(nhsNumber)",expectedStatus:200 }
+    * match response == 
+    """
+    {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "timestamp": "#? utils.isValidTimestamp(_)",
+      "total": 0
+    }
+    """
+    # Validate relationship on mother's record too - relationship shouldn't be created
+
+    * def requestHeaders = call read('classpath:auth/auth-headers.js')
+    * configure headers = requestHeaders
+    * call read('classpath:patients/common/getPatientsRelatedPerson.feature@getRelatedPersonDetails') { nhsNumber: "#(motherNhsNumber)",expectedStatus:200 }
+    * match response == 
+    """
+    {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "timestamp": "#? utils.isValidTimestamp(_)",
+      "total": 0
+    }
+    """ 
