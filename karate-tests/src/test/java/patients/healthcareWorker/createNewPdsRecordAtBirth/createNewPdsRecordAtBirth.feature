@@ -21,7 +21,6 @@ Feature: Create a new PDS record at birth
   * def motherNhsNumber = response.id 
   * url baseURL 
  
-  @sandbox
   Scenario: create  PDS record at birth - successful
     * def babyGender = utils.randomGender()
     * def babyBirthDate = utils.randomNewbornDateLast5Days()
@@ -49,7 +48,6 @@ Feature: Create a new PDS record at birth
     * configure headers = requestHeaders
     * call read('classpath:patients/common/getPatientsRelatedPerson.feature@getRelatedPersonDetails') { nhsNumber: "#(motherNhsNumber)",expectedStatus:200 }
     * match response.entry[0].resource.relationship[0].coding[0].code == "CHILD"
-
 
   Scenario: Fail to create a record for a new patient, single demographics match found
     * def babyGender = utils.randomGender()
@@ -108,7 +106,7 @@ Feature: Create a new PDS record at birth
     * def patientPayload = read('classpath:patients/healthcareWorker/createPatient/post-patient-request.json')
   
     * call read('classpath:patients/common/createPatient.feature@createPatient') { patientPayload:"#(patientPayload)", expectedStatus: 201 }
-    * def motherNhsNumber = response.entry[0].resource.id
+    * def motherNhsNumber = response.id
     * def createRecordAtBirthPayload = read('classpath:patients/healthcareWorker/createNewPdsRecordAtBirth/create-pds-record-at-birth.json')   
      # second create at birth with different mother nhs number, mother dob and ignore_potential_matches=true
     * def requestHeaders = call read('classpath:auth/auth-headers.js')
@@ -128,7 +126,7 @@ Feature: Create a new PDS record at birth
     * def patientPayload = read('classpath:patients/healthcareWorker/createPatient/post-patient-request.json')
   
     * call read('classpath:patients/common/createPatient.feature@createPatient') { patientPayload:"#(patientPayload)", expectedStatus: 201 }
-    * def motherNhsNumber = response.id 
+    * def motherNhsNumber = response.id
     * def createRecordAtBirthPayload = read('classpath:patients/healthcareWorker/createNewPdsRecordAtBirth/create-pds-record-at-birth.json')
  
       # third create at birth with different mother nhs number, mother dob
@@ -137,7 +135,24 @@ Feature: Create a new PDS record at birth
     * call read('classpath:patients/common/createNewPdsRecordAtBirth.feature@createRecordAtBirth ') { createRecordAtBirthPayload: "#(createRecordAtBirthPayload)", expectedStatus: 200 }
     * match response == read('classpath:mocks/stubs/postPatientResponses/MULTIPLE_MATCHES_FOUND.json') 
 
- @sandbox-only
+ @sandbox-only 
+ Scenario: create  PDS record at birth - successful
+    * def babyGender = utils.randomGender()
+    * def babyBirthDate = utils.randomNewbornDateLast5Days()
+    * def babyBirthTime = babyBirthDate + utils.randomTime()
+    * def babyBirthOrder = 1
+    * def babyBirthWeight = utils.randomBirthWeight()
+    * def babyGivenName = ["#(faker.givenName())", "#(faker.givenName())"]
+    * def requestHeaders = call read('classpath:auth/auth-headers.js')
+    * configure headers = requestHeaders 
+    * call read('classpath:patients/common/createNewPdsRecordAtBirth.feature@createRecordAtBirth ') { expectedStatus: 201 }
+    * def nhsNumber = response.entry[0].resource.id
+    * def expectedResponse = read('classpath:patients/healthcareWorker/createNewPdsRecordAtBirth/create_record_at_birth_response_template.json')
+    * match response == expectedResponse
+    * match response.entry[0].resource.address[0].line[0] == address.line[1]
+    * match responseHeaders['notification-id'] == '#present'    
+
+ @sandbox-only 
   Scenario: Fail to create a record for a new patient, single demographics match found
     # we rely on data that's already in the database for our existing record
     * def nhsNumber = "5900004899"
@@ -198,7 +213,7 @@ Feature: Create a new PDS record at birth
     * call read('classpath:patients/common/createNewPdsRecordAtBirth.feature@createRecordAtBirth') { expectedStatus: 200 }
     * match response == read('classpath:mocks/stubs/postPatientResponses/MULTIPLE_MATCHES_FOUND.json')  
 
-  @sandbox  
+  @sandbox
   Scenario Outline: Negative path: missing value in request body - missing <missingValue>
     * def babyGender = utils.randomGender()
     * def babyBirthDate = utils.randomNewbornDateLast5Days()
@@ -223,7 +238,7 @@ Feature: Create a new PDS record at birth
     | classpath:patients/healthcareWorker/createNewPdsRecordAtBirth/MissingValuesPayload/create-pds-record-at-birth-missing-birthweight-value.json |entry/1/resource/valueQuantity/value|
     | classpath:patients/healthcareWorker/createNewPdsRecordAtBirth/MissingValuesPayload/create-pds-record-at-birth-missing-mother-nhs-number.json |entry/7/resource/identifier/0/value|    
 
-  @sandbox  
+  @sandbox
   Scenario Outline: Negative path: invalid value in request body - <property>
     * def validBabyGender = utils.randomGender()
     * def validBabyBirthDate = utils.randomNewbornDateLast5Days()
@@ -451,13 +466,13 @@ Feature: Create a new PDS record at birth
     * match ethnicityExtension != null
     * match ethnicityExtension.extension[0].url == '#present'
     * match ethnicityExtension.extension[0].url ==  'https://fhir.hl7.org.uk/StructureDefinition/Extension-UKCore-EthnicCategory' 
- 
-  Scenario: create  PDS record at birth - Mother gender is male - response should still be 201 created and warning should be returned in the response body
+
+  Scenario: create  PDS record at birth - Mother gender is male and age is out of range- response should still be 201 created and warning should be returned in the response body
     # create a mother with male gender
     * def givenName = ["#(faker.givenName())", "#(faker.givenName())"]
     * def prefix = ["#(utils.randomPrefix())"]
     * def gender = "male"
-    * def birthDate = utils.randomBirthDateBetween16And40()
+    * def birthDate = utils.randomDateWithInYearsInThePast(9)
     * def randomAddress = utils.randomAddress(birthDate)
     * def address = randomAddress
     * configure headers = call read('classpath:auth/auth-headers.js')
@@ -480,6 +495,7 @@ Feature: Create a new PDS record at birth
     * def issues = response.entry[0].response.outcome.issue
     * assert issues.length >= 1
     * match issues[*].diagnostics contains "Failed to link to mother's record - mother's gender is male."
+    * match issues[*].diagnostics contains "Failed to link to mother's record - mother's age out of valid range."
 
     #  Validate relationship on Child's record - releationship shouldn't be created
     * def requestHeaders = call read('classpath:auth/auth-headers.js')
