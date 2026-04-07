@@ -463,7 +463,7 @@ Feature: Create a new PDS record at birth
     * call read('classpath:patients/common/getPatientByNHSNumber.feature@getPatientByNhsNumber'){ expectedStatus: 200, nhsNumber:"#(newlyAllocatedNhsNumber)"}
     
     # ethnicity extension is enabled for asid:ODScode - 200000001215:A20047 
-    * def ethnicityExtension = karate.jsonPath(response, "$.entry[0].resource.extension[?(@.url==  'https://fhir.hl7.org.uk/StructureDefinition/Extension-UKCore-EthnicCategory' )]")[0]
+    * def ethnicityExtension = karate.jsonPath(response, "$.extension[?(@.url==  'https://fhir.hl7.org.uk/StructureDefinition/Extension-UKCore-EthnicCategory' )]")[0]
     * match ethnicityExtension != null
     * match ethnicityExtension.extension[0].url == '#present'
     * match ethnicityExtension.extension[0].url ==  'https://fhir.hl7.org.uk/StructureDefinition/Extension-UKCore-EthnicCategory' 
