@@ -11,6 +11,7 @@ Feature: Get Patient
   Scenario: All headers provided - restricted user can search for a patient and get a single match result returned
     * configure headers = requestHeaders 
     * path "Patient"
+    * retry until responseStatus != 429 && responseStatus != 503 && responseStatus != 502
     * param family = "Smith" 
     * param gender = "female"
     * param birthdate = "eq2018-06-08" 
@@ -30,6 +31,7 @@ Feature: Get Patient
       }
       """
     * path "Patient"
+    * retry until responseStatus != 429 && responseStatus != 503 && responseStatus != 502
     * param family = "Smith" 
     * param gender = "female"
     * param birthdate = "2010-10-22" 
@@ -51,6 +53,7 @@ Feature: Get Patient
     # https://nhsd-jira.digital.nhs.uk/browse/SPINEDEM-3187
     * configure headers = requestHeaders
     * path "Patient"
+    * retry until responseStatus != 429 && responseStatus != 503 && responseStatus != 502
     * param family = "Magin" 
     * param gender = "female"
     * param birthdate = "1957-07-23" 
@@ -63,6 +66,7 @@ Feature: Get Patient
   Scenario: PDS FHIR API accepts request for one result
     * configure headers = requestHeaders 
     * path "Patient"
+    * retry until responseStatus != 429 && responseStatus != 503 && responseStatus != 502
     * param family = "Smith" 
     * param gender = "female"
     * param birthdate = "2010-10-22" 
