@@ -86,7 +86,7 @@
                                 "coding": [
                                     {
                                         "code": "INVALID_UPDATE",
-                                        "display": "Patient links business violation.",
+                                        "display": "Parent links business violation.",
                                         "system": "https://fhir.nhs.uk/R4/CodeSystem/Spine-ErrorOrWarningCode"
                                     }
                                 ]
@@ -100,7 +100,7 @@
                                 "coding": [
                                     {
                                         "code": "INVALID_UPDATE",
-                                        "display": "Patient links business violation.",
+                                        "display": "Parent links business violation.",
                                         "system": "https://fhir.nhs.uk/R4/CodeSystem/Spine-ErrorOrWarningCode"
                                     }
                                 ]
@@ -114,7 +114,7 @@
                                 "coding": [
                                     {
                                         "code": "INVALID_UPDATE",
-                                        "display": "Patient links business violation.",
+                                        "display": "Parent links business violation.",
                                         "system": "https://fhir.nhs.uk/R4/CodeSystem/Spine-ErrorOrWarningCode"
                                     }
                                 ]

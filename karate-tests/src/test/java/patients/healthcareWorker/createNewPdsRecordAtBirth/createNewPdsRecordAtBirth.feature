@@ -72,7 +72,7 @@ Feature: Create a new PDS record at birth
     * configure headers = requestHeaders 
     * call read('classpath:patients/common/createNewPdsRecordAtBirth.feature@createRecordAtBirth') { expectedStatus: 200, ignoreDuplicatesValue: true }
     * match response == read('classpath:mocks/stubs/postPatientResponses/SINGLE_MATCH_FOUND.json')
-  
+
   Scenario: Fail to create a record for a new patient, multiple demographics match found
        ##    1. Send a Create-Patient-at-Birth request with demographic details
              2. Wait until PDS record is created
@@ -113,7 +113,8 @@ Feature: Create a new PDS record at birth
     * configure headers = requestHeaders 
       # second create at birth with different mother nhs number, mother dob - creating new mother nhs number and overriding global motherNhsNumber variables
     * def createBabyResponse = call read('classpath:patients/common/createNewPdsRecordAtBirth.feature@createRecordAtBirth') { createRecordAtBirthPayload: "#(createRecordAtBirthPayload)", expectedStatus: 201, ignoreDuplicatesValue: true  }
-    * def nhsNumber2 = createBabyResponse.entry[0].resource.id
+    * print "createBabyResponse: ", createBabyResponse
+    * def nhsNumber2 = createBabyResponse.response.entry[0].resource.id
  
     * def givenName = ["#(faker.givenName())", "#(faker.givenName())"]
     * def prefix = ["#(utils.randomPrefix())"]
@@ -466,7 +467,7 @@ Feature: Create a new PDS record at birth
     * match ethnicityExtension != null
     * match ethnicityExtension.extension[0].url == '#present'
     * match ethnicityExtension.extension[0].url ==  'https://fhir.hl7.org.uk/StructureDefinition/Extension-UKCore-EthnicCategory' 
-
+ 
   Scenario: create  PDS record at birth - Mother gender is male and age is out of range- response should still be 201 created and warning should be returned in the response body
     # create a mother with male gender
     * def givenName = ["#(faker.givenName())", "#(faker.givenName())"]
