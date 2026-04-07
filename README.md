@@ -49,17 +49,17 @@ exec $SHELL
 ```
 If the command isn't working you can also [try the instructions here.](https://www.liquidweb.com/kb/how-to-install-pyenv-on-ubuntu-18-04/)
 
-Install python 3.9
+Install python 3.13
 ```bash
-pyenv install 3.9
+pyenv install 3.13
 ```
 Either set this as your global python (if this is not incompatible with your other projects),
 ```bash
-pyenv global 3.9
+pyenv global 3.13
 ```
 or local to repository, if there is not a python-version file installed (you might have to raise a PR to add the file that's created).
 ```bash
-pyenv local 3.9
+pyenv local 3.13
 python --version
 ```
 
