@@ -29,6 +29,7 @@ function generateObjectId () {
 const NEW_PATIENT_AT_BIRTH = context.read('classpath:mocks/stubs/postPdsRecordAtBirthResponses/new_pds_record_at_birth.json')
 const SINGLE_MATCH_AT_BIRTH = context.read('classpath:mocks/stubs/postPatientResponses/SINGLE_MATCH_FOUND.json')
 const MULTIPLE_MATCHES_AT_BIRTH = context.read('classpath:mocks/stubs/postPatientResponses/MULTIPLE_MATCHES_FOUND.json')
+const OUT_OF_RANGE_MOTHER_AGE = context.read('classpath:mocks/stubs/postPdsRecordAtBirthResponses/new_pds_record_at_birth_out__of_range_mother_age.json')
 
 function requestMatchesErrorScenario (request) {
   // the mocks are programmed to demonstrate error scenarios where we already have matching patients
@@ -191,29 +192,50 @@ function initializePatientData (request) {
   )
   const requestPatient = patientEntry?.resource
 
-  const patient = JSON.parse(JSON.stringify(NEW_PATIENT_AT_BIRTH)) // NOSONAR - structuredClone not available in Karate
+  // Find the mother patient resource (the one with an NHS number identifier)
+  const motherEntry = request.body?.entry?.find(entry =>
+    entry.resource?.resourceType === 'Patient' &&
+    entry.resource?.identifier?.some(id => id.system === 'https://fhir.nhs.uk/Id/nhs-number')
+  )
+  const motherBirthDate = motherEntry?.resource?.birthDate
+
+  // Check if mother is less than 12 years old
+  const isMotherUnder12 = motherBirthDate && (function () {
+    const today = new Date()
+    const twelveYearsAgo = new Date(today.getFullYear() - 12, today.getMonth(), today.getDate())
+    return new Date(motherBirthDate) > twelveYearsAgo
+  })()
+
+  const bundleTemplate = isMotherUnder12 ? OUT_OF_RANGE_MOTHER_AGE : NEW_PATIENT_AT_BIRTH
+  const transactionBundle = JSON.parse(JSON.stringify(bundleTemplate)) // NOSONAR - structuredClone not available in Karate
+  const responsePatientEntry = transactionBundle.entry?.find(entry => entry.resource?.resourceType === 'Patient')
+  const responsePatient = responsePatientEntry?.resource
+
+  if (!responsePatient) {
+    throw new Error('NEW_PATIENT_AT_BIRTH does not contain a Patient resource in bundle.entry')
+  }
 
   // set a new NHS number for the patient
 
-  patient.id = '5900010775'
-  patient.identifier[0].value = '5900010775'
+  responsePatient.id = '5900010775'
+  responsePatient.identifier[0].value = '5900010775'
 
   // name and address objects need an ID
-  patient.name[0] = requestPatient.name[0]
-  patient.name[0].id = generateObjectId()
+  responsePatient.name[0] = requestPatient.name[0]
+  responsePatient.name[0].id = generateObjectId()
 
   // in the address object, the line property is an array that can contain blank strings. For the response,
   // the blank strings are removed.
   const line = requestPatient.address[0].line.filter((line) => line !== '')
-  patient.address[0] = requestPatient.address[0]
-  patient.address[0].line = line
-  patient.address[0].id = generateObjectId()
+  responsePatient.address[0] = requestPatient.address[0]
+  responsePatient.address[0].line = line
+  responsePatient.address[0].id = generateObjectId()
 
   // set the other properties
-  patient.gender = requestPatient.gender
-  patient.birthDate = requestPatient.birthDate
-
-  return patient
+  responsePatient.gender = requestPatient.gender
+  responsePatient.birthDate = requestPatient.birthDate
+  responsePatient.multipleBirthInteger = requestPatient.multipleBirthInteger
+  return transactionBundle
 }
 
 function handlePatientCreationRequest (request) {

@@ -1,0 +1,134 @@
+{
+    "entry": [
+        {
+            "resource": {
+                "address": [
+                    {
+                        "id": "BBD2FA8A",
+                        "line": [
+                            "39 Ermin Street",
+                            "YARDLEY HASTINGS"
+                        ],
+                        "period": {
+                            "start": "2023-08-19"
+                        },
+                        "postalCode": "NN7 9UA",
+                        "use": "home"
+                    }
+                ],
+                "birthDate": "2026-04-02",
+                "extension": [
+                    {
+                        "url": "http://hl7.org/fhir/StructureDefinition/patient-birthPlace",
+                        "valueAddress": {
+                            "city": "Manchester",
+                            "country": "1",
+                            "district": "Greater Manchester"
+                        }
+                    }
+                ],
+                "gender": "male",
+                "id": "5900201791",
+                "identifier": [
+                    {
+                        "extension": [
+                            {
+                                "url": "https://fhir.hl7.org.uk/StructureDefinition/Extension-UKCore-NHSNumberVerificationStatus",
+                                "valueCodeableConcept": {
+                                    "coding": [
+                                        {
+                                            "code": "01",
+                                            "display": "Number present and verified",
+                                            "system": "https://fhir.hl7.org.uk/CodeSystem/UKCore-NHSNumberVerificationStatus",
+                                            "version": "1.0.0"
+                                        }
+                                    ]
+                                }
+                            }
+                        ],
+                        "system": "https://fhir.nhs.uk/Id/nhs-number",
+                        "value": "5900201791"
+                    }
+                ],
+                "meta": {
+                    "security": [
+                        {
+                            "code": "U",
+                            "display": "unrestricted",
+                            "system": "http://terminology.hl7.org/CodeSystem/v3-Confidentiality"
+                        }
+                    ],
+                    "versionId": "1"
+                },
+                "multipleBirthInteger": 1,
+                "name": [
+                    {
+                        "family": "ToRemove",
+                        "given": [
+                            "Judie",
+                            "Charissa"
+                        ],
+                        "id": "39C9EA05",
+                        "period": {
+                            "start": "2026-04-02"
+                        },
+                        "use": "usual"
+                    }
+                ],
+                "resourceType": "Patient"
+            },
+            "response": {
+                "outcome": {
+                    "issue": [
+                        {
+                            "code": "business-rule",
+                            "details": {
+                                "coding": [
+                                    {
+                                        "code": "INVALID_UPDATE",
+                                        "display": "Parent links business violation.",
+                                        "system": "https://fhir.nhs.uk/R4/CodeSystem/Spine-ErrorOrWarningCode"
+                                    }
+                                ]
+                            },
+                            "diagnostics": "Failed to link to mother's record - mother's gender is male.",
+                            "severity": "warning"
+                        },
+                        {
+                            "code": "business-rule",
+                            "details": {
+                                "coding": [
+                                    {
+                                        "code": "INVALID_UPDATE",
+                                        "display": "Parent links business violation.",
+                                        "system": "https://fhir.nhs.uk/R4/CodeSystem/Spine-ErrorOrWarningCode"
+                                    }
+                                ]
+                            },
+                            "diagnostics": "Failed to link to mother's record - mother's age out of valid range.",
+                            "severity": "warning"
+                        },
+                        {
+                            "code": "business-rule",
+                            "details": {
+                                "coding": [
+                                    {
+                                        "code": "INVALID_UPDATE",
+                                        "display": "Parent links business violation.",
+                                        "system": "https://fhir.nhs.uk/R4/CodeSystem/Spine-ErrorOrWarningCode"
+                                    }
+                                ]
+                            },
+                            "diagnostics": "Failed to link to mother's record.",
+                            "severity": "warning"
+                        }
+                    ],
+                    "resourceType": "OperationOutcome"
+                },
+                "status": "201 Created"
+            }
+        }
+    ],
+    "resourceType": "Bundle",
+    "type": "transaction-response"
+}
