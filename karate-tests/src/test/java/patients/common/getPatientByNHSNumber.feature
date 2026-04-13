@@ -10,6 +10,7 @@ Feature:Get a patient By NHS number - Reusable feature to be used when we need t
     * def nhsNumber = '9000000000'
     * def expectedBody = read('classpath:mocks/stubs/errorResponses/INVALID_RESOURCE_ID.json')
     * path 'Patient', nhsNumber
+    * retry until responseStatus != 429 && responseStatus != 503 && responseStatus != 502
     * method get
     * status 400
     * match response == expectedBody
@@ -19,6 +20,7 @@ Feature:Get a patient By NHS number - Reusable feature to be used when we need t
     * def nhsNumber = '9727194737'
     * def expectedBody = read('classpath:mocks/stubs/errorResponses/RESOURCE_NOT_FOUND.json')
     * path 'Patient', nhsNumber
+    * retry until responseStatus != 429 && responseStatus != 503 && responseStatus != 502
     * method get
     * status 404
     * match response == expectedBody
@@ -28,6 +30,7 @@ Feature:Get a patient By NHS number - Reusable feature to be used when we need t
     * def nhsNumber = '9990003343'
     * def expectedBody = read('classpath:mocks/stubs/errorResponses/INVALIDATED_RESOURCE.json')
     * path 'Patient', nhsNumber
+    * retry until responseStatus != 429 && responseStatus != 503 && responseStatus != 502
     * method get
     * status 404
     * match response == expectedBody

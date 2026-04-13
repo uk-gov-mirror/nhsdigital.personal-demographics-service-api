@@ -15,6 +15,7 @@ Feature: Get related person details - Reusable feature to be used when we need t
   Scenario: Patient has one related person
     * def nhsNumber = '9693633679'
     * path 'Patient', nhsNumber, 'RelatedPerson'
+    * retry until responseStatus != 429 && responseStatus != 503 && responseStatus != 502
     * method get
     * status 200
     * assert utils.validateResponseHeaders(requestHeaders, responseHeaders)
@@ -25,6 +26,7 @@ Feature: Get related person details - Reusable feature to be used when we need t
   Scenario: Patient doesn't have a related person
     * def nhsNumber = '9693632109'
     * path 'Patient', nhsNumber, 'RelatedPerson'
+    * retry until responseStatus != 429 && responseStatus != 503 && responseStatus != 502
     * method get
     * status 200
     * assert utils.validateResponseHeaders(requestHeaders, responseHeaders)
@@ -41,6 +43,7 @@ Feature: Get related person details - Reusable feature to be used when we need t
   @getRelatedPersonDetails
   Scenario: Retrieve patient related person details
     * path 'Patient', nhsNumber, 'RelatedPerson'
+    * retry until responseStatus != 429 && responseStatus != 503 && responseStatus != 502
     * method get
     * match responseStatus == expectedStatus
     * assert utils.validateResponseHeaders(requestHeaders, responseHeaders)   

@@ -8,6 +8,7 @@ Feature: Get Patient - Reusable feature to be used when we need to search for pa
   Scenario: Missing Authorization header
     * configure headers = noAuthHeaders
     * path "Patient"
+    * retry until responseStatus != 429 && responseStatus != 503 && responseStatus != 502
     * method get
     * status 401
     * match response.issue[0].diagnostics == "Missing Authorization header"
@@ -17,6 +18,7 @@ Feature: Get Patient - Reusable feature to be used when we need to search for pa
     * configure headers = noAuthHeaders
     * header Authorization = authorization_header
     * path "Patient"
+    * retry until responseStatus != 429 && responseStatus != 503 && responseStatus != 502
     * method get
     * status 401
     * match response.issue[0].diagnostics == expected_diagnostics
@@ -26,6 +28,7 @@ Feature: Get Patient - Reusable feature to be used when we need to search for pa
   Scenario: Too many matches message when search result return more than one match
     * configure headers = requestHeaders 
     * path "Patient"
+    * retry until responseStatus != 429 && responseStatus != 503 && responseStatus != 502
     * param family = "Ma*" 
     * param gender = "female"
     * param birthdate = "eq1957-07-23" 

@@ -98,6 +98,21 @@ Scenario:
         return randomDate.toISOString().split('T')[0]
       }
     """
+
+    * def randomDateWithInYearsInThePast =
+    """
+      function(noOfYears) {
+        const today = new Date()
+        const min = today.getTime()
+        const maxDate = new Date(today)
+        maxDate.setFullYear(maxDate.getFullYear() - noOfYears)
+        const max = maxDate.getTime()
+        const randomValue = Math.random() * (max - min) + min
+        const randomDate = new Date(randomValue)
+        return randomDate.toISOString().split('T')[0]
+      }
+    """
+    
     * def randomDateFromPreviousMonth =
     """
       function() {
