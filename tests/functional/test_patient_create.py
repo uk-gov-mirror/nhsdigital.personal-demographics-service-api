@@ -191,7 +191,10 @@ def post_create_record_at_birth_multiple_times(healthcare_worker_auth_headers: d
 
 
 @pytest.mark.asyncio
-@when("I post to the Patient endpoint and create record at birth endpoint more than 3 times per second in total", target_fixture='post_results')
+@when(
+    "I post to the Patient endpoint and create record at birth endpoint more than 3 times per second in total",
+    target_fixture='post_results'
+)
 def post_to_both_endpoints_multiple_times(healthcare_worker_auth_headers: dict, pds_url: str) -> list:
     request_specs = _create_mixed_request_specs(pds_url)
     return _run_rate_limit_requests(healthcare_worker_auth_headers, request_specs)
