@@ -26,6 +26,16 @@ def test_post_patient_rate_limit():
     pass
 
 
+@scenario('The rate limit is tripped when POSTing to new create record at birth (>3tps)')
+def test_post_create_record_at_birth_rate_limit():
+    pass
+
+
+@scenario('The rate limit is shared between create patient and create record at birth (3tps total)')
+def test_shared_rate_limit_between_patient_create_endpoints():
+    pass
+
+
 # FIXTURES------------------------------------------------------------------------------------------------------
 @pytest.fixture(scope='function')
 def healthcare_worker_auth_headers(identity_service_base_url: str) -> dict:
@@ -124,6 +134,22 @@ async def _create_all_patients(headers, url, body, loop, num_patients):
         return results
 
 
+async def _create_mixed_patients(headers, pds_url, loop, num_patients):
+    conn = aiohttp.TCPConnector(limit=3)
+    async with aiohttp.ClientSession(connector=conn, loop=loop) as session:
+        urls_and_bodies = [
+            (f'{pds_url}/Patient', json.dumps({"nhsNumberAllocation": "Done"})),
+            (f'{pds_url}/Patient/$create-record-at-birth', json.dumps({"createRecordAtBirthAllocation": "Done"}))
+        ]
+
+        results = await asyncio.gather(
+            *[_create_patient(session, headers, urls_and_bodies[i % 2][0], urls_and_bodies[i % 2][1])
+              for i in range(num_patients)],
+            return_exceptions=True
+        )
+        return results
+
+
 # STEPS----------------------------------------------------------------------------------------------------------
 # ---------------------------------------------------------------------------------------------------------------
 # WHEN------------------------------------------------------------------------------------------------------------
@@ -140,6 +166,61 @@ def post_patient_multiple_times(healthcare_worker_auth_headers: dict, pds_url: s
     loop = asyncio.new_event_loop()
     results = loop.run_until_complete(
         _create_all_patients(healthcare_worker_auth_headers, url, body, loop, patients_to_create)
+    )
+    request_times = [x['request_time'] for x in results]
+    request_times.sort()
+    elapsed_time_req = request_times[-1] - request_times[0]
+    assert elapsed_time_req.seconds == 0
+
+    response_times = [x['response_time'] for x in results]
+    response_times.sort()
+    actual_time_between_first_and_last_request = response_times[-1] - response_times[0]
+
+    # we fired requests at or faster than the expected rate
+    assert actual_time_between_first_and_last_request.seconds <= target_time_between_first_and_last_request
+
+    return results
+
+
+@pytest.mark.asyncio
+@when("I post to the create record at birth endpoint more than 3 times per second", target_fixture='post_results')
+def post_create_record_at_birth_multiple_times(healthcare_worker_auth_headers: dict, pds_url: str) -> list:
+    # firing 40 requests in 10 seconds should trigger the spike arrest policy
+    patients_to_create = 40
+    target_time_between_first_and_last_request = 10
+
+    url = f'{pds_url}/Patient/$create-record-at-birth'
+    body = json.dumps({"createRecordAtBirthAllocation": "Done"})
+
+    loop = asyncio.new_event_loop()
+    results = loop.run_until_complete(
+        _create_all_patients(healthcare_worker_auth_headers, url, body, loop, patients_to_create)
+    )
+    request_times = [x['request_time'] for x in results]
+    request_times.sort()
+    elapsed_time_req = request_times[-1] - request_times[0]
+    assert elapsed_time_req.seconds == 0
+
+    response_times = [x['response_time'] for x in results]
+    response_times.sort()
+    actual_time_between_first_and_last_request = response_times[-1] - response_times[0]
+
+    # we fired requests at or faster than the expected rate
+    assert actual_time_between_first_and_last_request.seconds <= target_time_between_first_and_last_request
+
+    return results
+
+
+@pytest.mark.asyncio
+@when("I post to the Patient endpoint and create record at birth endpoint more than 3 times per second in total", target_fixture='post_results')
+def post_to_both_endpoints_multiple_times(healthcare_worker_auth_headers: dict, pds_url: str) -> list:
+    # firing 40 total requests across both endpoints in 10 seconds should trigger a shared spike arrest policy
+    patients_to_create = 40
+    target_time_between_first_and_last_request = 10
+
+    loop = asyncio.new_event_loop()
+    results = loop.run_until_complete(
+        _create_mixed_patients(healthcare_worker_auth_headers, pds_url, loop, patients_to_create)
     )
     request_times = [x['request_time'] for x in results]
     request_times.sort()
