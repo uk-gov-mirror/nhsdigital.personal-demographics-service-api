@@ -149,7 +149,6 @@ Feature: Patch patient - Add and remove data
     * match response.name[0].suffix == '#notpresent'
     * match parseInt(response.meta.versionId) == scnVersionAfterSuffix + 1
  
-  @sandbox
   Scenario: Add suffix to the existing array of suffixes and then remove the same 
     # 1. Add new suffix to the array
     # ==============================
@@ -326,4 +325,4 @@ Scenario: Add deceasedTime in yyyy-mm-ddTHH:MM:SS+00:00 format and then replace 
   * def deceasedDate = utils.randomDateFromPreviousMonth()
   * def requestBody = {"patches": [{ "op": "replace", "path": "/deceasedDateTime", "value": "#(deceasedDate)" }]}
   * call read('classpath:patients/common/updatePatient.feature@updatePatientDetails'){ nhsNumber:"#(nhsNumber)", requestBody:"#(requestBody)", originalEtag:"#(etagAfterUpdate2)",expectedStatus: 200}
-  * match response.deceasedDateTime contains deceasedDate 
+  * match response.deceasedDateTime contains deceasedDate
