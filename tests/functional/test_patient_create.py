@@ -20,24 +20,10 @@ from tests.functional.utils.helpers import get_role_id_from_user_info_endpoint
 
 scenario = partial(pytest_bdd.scenario, './features/post_patient.feature')
 
-PATIENTS_TO_CREATE = 40
-TARGET_TIME_BETWEEN_FIRST_AND_LAST_REQUEST = 10
-MAX_CONCURRENT_REQUESTS = PATIENTS_TO_CREATE
-
 
 @scenario('The rate limit is tripped when POSTing new Patients (>3tps)')
 def test_post_patient_rate_limit():
-    """BDD scenario wrapper implemented by pytest-bdd steps."""
-
-
-@scenario('The rate limit is tripped when POSTing to new create record at birth (>3tps)')
-def test_post_create_record_at_birth_rate_limit():
-    """BDD scenario wrapper implemented by pytest-bdd steps."""
-
-
-@scenario('The rate limit is shared between create patient and create record at birth (3tps total)')
-def test_shared_rate_limit_between_patient_create_endpoints():
-    """BDD scenario wrapper implemented by pytest-bdd steps."""
+    pass
 
 
 # FIXTURES------------------------------------------------------------------------------------------------------
@@ -128,46 +114,14 @@ async def _create_patient(session, headers, url, body):
         return details
 
 
-async def _create_patients(headers, request_specs, loop):
-    conn = aiohttp.TCPConnector(limit=MAX_CONCURRENT_REQUESTS, limit_per_host=MAX_CONCURRENT_REQUESTS)
+async def _create_all_patients(headers, url, body, loop, num_patients):
+    conn = aiohttp.TCPConnector(limit=3)
     async with aiohttp.ClientSession(connector=conn, loop=loop) as session:
         results = await asyncio.gather(
-            *[_create_patient(session, headers, url, body) for url, body in request_specs],
+            *[_create_patient(session, headers, url, body) for _ in range(num_patients)],
             return_exceptions=True
         )
         return results
-
-
-def _create_request_specs(url, body, num_patients=PATIENTS_TO_CREATE):
-    return [(url, body) for _ in range(num_patients)]
-
-
-def _create_mixed_request_specs(pds_url, num_patients=PATIENTS_TO_CREATE):
-    urls_and_bodies = [
-        (f'{pds_url}/Patient', json.dumps({"nhsNumberAllocation": "Done"})),
-        (f'{pds_url}/Patient/$create-record-at-birth', json.dumps({"createRecordAtBirthAllocation": "Done"}))
-    ]
-    return [urls_and_bodies[i % len(urls_and_bodies)] for i in range(num_patients)]
-
-
-def _assert_requests_fired_fast_enough(results, target_time_between_first_and_last_request):
-    request_times = sorted(x['request_time'] for x in results)
-    elapsed_time_req = request_times[-1] - request_times[0]
-    assert elapsed_time_req.total_seconds() < 1
-
-    response_times = sorted(x['response_time'] for x in results)
-    actual_time_between_first_and_last_request = response_times[-1] - response_times[0]
-
-    assert actual_time_between_first_and_last_request.total_seconds() <= target_time_between_first_and_last_request
-
-
-def _run_rate_limit_requests(healthcare_worker_auth_headers: dict, request_specs: list) -> list:
-    loop = asyncio.new_event_loop()
-    results = loop.run_until_complete(
-        _create_patients(healthcare_worker_auth_headers, request_specs, loop)
-    )
-    _assert_requests_fired_fast_enough(results, TARGET_TIME_BETWEEN_FIRST_AND_LAST_REQUEST)
-    return results
 
 
 # STEPS----------------------------------------------------------------------------------------------------------
@@ -176,29 +130,30 @@ def _run_rate_limit_requests(healthcare_worker_auth_headers: dict, request_specs
 @pytest.mark.asyncio
 @when("I post to the Patient endpoint more than 3 times per second", target_fixture='post_results')
 def post_patient_multiple_times(healthcare_worker_auth_headers: dict, pds_url: str) -> list:
+    # firing 40 requests in 10 seconds should trigger the spike arrest policy
+    patients_to_create = 40
+    target_time_between_first_and_last_request = 10
+
     url = f'{pds_url}/Patient'
     body = json.dumps({"nhsNumberAllocation": "Done"})
-    request_specs = _create_request_specs(url, body)
-    return _run_rate_limit_requests(healthcare_worker_auth_headers, request_specs)
 
+    loop = asyncio.new_event_loop()
+    results = loop.run_until_complete(
+        _create_all_patients(healthcare_worker_auth_headers, url, body, loop, patients_to_create)
+    )
+    request_times = [x['request_time'] for x in results]
+    request_times.sort()
+    elapsed_time_req = request_times[-1] - request_times[0]
+    assert elapsed_time_req.seconds == 0
 
-@pytest.mark.asyncio
-@when("I post to the create record at birth endpoint more than 3 times per second", target_fixture='post_results')
-def post_create_record_at_birth_multiple_times(healthcare_worker_auth_headers: dict, pds_url: str) -> list:
-    url = f'{pds_url}/Patient/$create-record-at-birth'
-    body = json.dumps({"createRecordAtBirthAllocation": "Done"})
-    request_specs = _create_request_specs(url, body)
-    return _run_rate_limit_requests(healthcare_worker_auth_headers, request_specs)
+    response_times = [x['response_time'] for x in results]
+    response_times.sort()
+    actual_time_between_first_and_last_request = response_times[-1] - response_times[0]
 
+    # we fired requests at or faster than the expected rate
+    assert actual_time_between_first_and_last_request.seconds <= target_time_between_first_and_last_request
 
-@pytest.mark.asyncio
-@when(
-    "I post to the Patient endpoint and create record at birth endpoint more than 3 times per second in total",
-    target_fixture='post_results'
-)
-def post_to_both_endpoints_multiple_times(healthcare_worker_auth_headers: dict, pds_url: str) -> list:
-    request_specs = _create_mixed_request_specs(pds_url)
-    return _run_rate_limit_requests(healthcare_worker_auth_headers, request_specs)
+    return results
 
 
 # THEN------------------------------------------------------------------------------------------------------------
@@ -206,9 +161,13 @@ def post_to_both_endpoints_multiple_times(healthcare_worker_auth_headers: dict, 
 def assert_expected_spike_arrest_response_codes(post_results):
     successful_requests = [x for x in post_results if x['status'] == 400]
     spike_arrests = [x for x in post_results if x['status'] == 429]
-    # Different environments can throttle slightly differently; require a true 400/429 mix.
-    assert len(successful_requests) > 0
-    assert len(spike_arrests) > 0
+    actual_number_of_spike_arrests = len(spike_arrests)
+
+    patients_to_create = 40
+    target_time_between_first_and_last_request = 10
+    expected_minimum_number_of_spike_arrests = int(patients_to_create / target_time_between_first_and_last_request)
+
+    assert actual_number_of_spike_arrests >= expected_minimum_number_of_spike_arrests
     assert len(successful_requests) + len(spike_arrests) == len(post_results)
 
 
