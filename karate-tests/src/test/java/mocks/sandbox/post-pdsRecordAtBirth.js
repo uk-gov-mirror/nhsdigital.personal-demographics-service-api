@@ -199,14 +199,16 @@ function initializePatientData (request) {
   )
   const motherBirthDate = motherEntry?.resource?.birthDate
 
-  // Check if mother is less than 12 years old
-  const isMotherUnder12 = motherBirthDate && (function () {
+  // Check if mother age is outside valid range (under 12 or above 70)
+  const isMotherAgeOutOfRange = motherBirthDate && (function () {
     const today = new Date()
     const twelveYearsAgo = new Date(today.getFullYear() - 12, today.getMonth(), today.getDate())
-    return new Date(motherBirthDate) > twelveYearsAgo
+    const seventyYearsAgo = new Date(today.getFullYear() - 70, today.getMonth(), today.getDate())
+    const motherDob = new Date(motherBirthDate)
+    return motherDob > twelveYearsAgo || motherDob < seventyYearsAgo
   })()
 
-  const bundleTemplate = isMotherUnder12 ? OUT_OF_RANGE_MOTHER_AGE : NEW_PATIENT_AT_BIRTH
+  const bundleTemplate = isMotherAgeOutOfRange ? OUT_OF_RANGE_MOTHER_AGE : NEW_PATIENT_AT_BIRTH
   const transactionBundle = JSON.parse(JSON.stringify(bundleTemplate)) // NOSONAR - structuredClone not available in Karate
   const responsePatientEntry = transactionBundle.entry?.find(entry => entry.resource?.resourceType === 'Patient')
   const responsePatient = responsePatientEntry?.resource
