@@ -8,9 +8,7 @@ steps:
 
   - bash: |
 
-      url="https://$APIGEE_ENVIRONMENT_VALUE.api.service.nhs.uk/$SERVICE_BASE_PATH_VALUE/_status"
       interval_in_seconds=5
-      releaseCommit="$BUILD_SOURCE_VERSION_VALUE"
 
       printf "\nPolling %s every %s seconds, until commit is: %s\n" "$url" "$interval_in_seconds" "$releaseCommit"
 
@@ -20,7 +18,7 @@ steps:
       until [ $attempts -eq $max_attempts ]
       do
       echo "attempt: ${attempts}"
-      responseData=$(curl -H "apiKey: $STATUS_ENDPOINT_API_KEY_VALUE" "$url" -s)
+      responseData=$(curl -H "apiKey: $STATUS_ENDPOINT_API_KEY" "$url" -s)
       deployedCommit=$(echo "$responseData" | jq -r ".commitId" || echo "not_found")
       sandboxStatus=$(echo "$responseData" | jq -r ".status" || echo "not_found")
       if [ "$deployedCommit" == "$releaseCommit" ] && [ "$sandboxStatus" == "pass" ]; then
@@ -39,18 +37,16 @@ steps:
       fi
     displayName: Wait for sandbox to deploy
     env:
-      APIGEE_ENVIRONMENT_VALUE: $(APIGEE_ENVIRONMENT)
-      BUILD_SOURCE_VERSION_VALUE: $(Build.SourceVersion)
-      SERVICE_BASE_PATH_VALUE: $(SERVICE_BASE_PATH)
-      STATUS_ENDPOINT_API_KEY_VALUE: $(status-endpoint-api-key)
+      url: https://$(APIGEE_ENVIRONMENT).api.service.nhs.uk/$(SERVICE_BASE_PATH)/_status
+      releaseCommit: $(Build.SourceVersion)
+      STATUS_ENDPOINT_API_KEY: $(status-endpoint-api-key)
 
   - bash: |
-      newman run patient-demographics-sandbox.postman_collection.json --env-var "base_url=https://$ENVIRONMENT_VALUE.api.service.nhs.uk/$PDS_BASE_PATH_VALUE" -r cli,junit --insecure --reporter-junit-export newman-test-report.xml
+      newman run patient-demographics-sandbox.postman_collection.json --env-var "base_url=$BASE_URL" -r cli,junit --insecure --reporter-junit-export newman-test-report.xml
     workingDirectory: "$(ARTIFACT_PATH)/postman"
     displayName: 'Run Postman collection tests'
     env:
-      ENVIRONMENT_VALUE: $(ENVIRONMENT)
-      PDS_BASE_PATH_VALUE: $(PDS_BASE_PATH)
+      BASE_URL: https://$(ENVIRONMENT).api.service.nhs.uk/$(PDS_BASE_PATH)
 
   - task: PublishTestResults@2
     displayName: 'Publish Postman collection test results'
@@ -66,12 +62,11 @@ steps:
       artifactName: PostmanTestReport
 
   - bash: |
-      export CLIENT_ID="$CLIENT_ID_VALUE"
       mvn clean test -Dtest=TestMockParallel
     displayName: 'Run Karate Mock Tests'
     workingDirectory: "$(ARTIFACT_PATH)/karate-tests"
     env:
-      CLIENT_ID_VALUE: $(CLIENT_ID)
+      CLIENT_ID: $(CLIENT_ID)
 
   - task: PublishTestResults@2
     displayName: 'Publish Karate sandbox test results'
