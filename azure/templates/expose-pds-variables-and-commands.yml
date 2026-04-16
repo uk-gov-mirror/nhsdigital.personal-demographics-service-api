@@ -33,36 +33,36 @@ steps:
       - ptl/app-credentials/jwt_testing/non-prod/PRIVILEGED_ACCESS_API_KEY
 
   - bash: |
-      echo '##vso[task.setvariable variable=APIGEE_ENVIRONMENT]'"$ENVIRONMENT"
-      echo '##vso[task.setvariable variable=PDS_BASE_PATH]'"$SERVICE_BASE_PATH"
-      echo '##vso[task.setvariable variable=CLIENT_ID]'"$CLIENT_ID"
-      echo '##vso[task.setvariable variable=CLIENT_SECRET]'"$CLIENT_SECRET"
-      echo '##vso[task.setvariable variable=INTERACTION_FREE_CLIENT_ID]'"$INTERACTION_FREE_CLIENT_ID"
-      echo '##vso[task.setvariable variable=INTERACTION_FREE_CLIENT_SECRET]'"$INTERACTION_FREE_CLIENT_SECRET"
+      echo "##vso[task.setvariable variable=APIGEE_ENVIRONMENT]$ENVIRONMENT"
+      echo "##vso[task.setvariable variable=PDS_BASE_PATH]$SERVICE_BASE_PATH"
+      echo "##vso[task.setvariable variable=CLIENT_ID]$CLIENT_ID"
+      echo "##vso[task.setvariable variable=CLIENT_SECRET]$CLIENT_SECRET"
+      echo "##vso[task.setvariable variable=INTERACTION_FREE_CLIENT_ID]$INTERACTION_FREE_CLIENT_ID"
+      echo "##vso[task.setvariable variable=INTERACTION_FREE_CLIENT_SECRET]$INTERACTION_FREE_CLIENT_SECRET"
       echo '##vso[task.setvariable variable=KEY_ID]test-1'
-      echo '##vso[task.setvariable variable=EMPTY_ADDRESS_LINES_CLIENT_ID]'"$EMPTY_ADDRESS_LINES_CLIENT_ID"
-      echo '##vso[task.setvariable variable=EMPTY_ADDRESS_LINES_CLIENT_SECRET]'"$EMPTY_ADDRESS_LINES_CLIENT_SECRET"
-      echo '##vso[task.setvariable variable=CONFIDENTIAL_REMOVAL_REASONS_CLIENT_ID]'"$CONFIDENTIAL_REMOVAL_REASONS_CLIENT_ID"
-      echo '##vso[task.setvariable variable=CONFIDENTIAL_REMOVAL_REASONS_CLIENT_SECRET]'"$CONFIDENTIAL_REMOVAL_REASONS_CLIENT_SECRET"
-      echo '##vso[task.setvariable variable=RECORD_SHARING_CONSENT_APP_CLIENT_ID]'"$RECORD_SHARING_CONSENT_APP_CLIENT_ID"
-      echo '##vso[task.setvariable variable=RECORD_SHARING_CONSENT_APP_CLIENT_SECRET]'"$RECORD_SHARING_CONSENT_APP_CLIENT_SECRET"
-      echo '##vso[task.setvariable variable=TEST_PATIENT_ID]'"$TEST_PATIENT_ID"
-      echo '##vso[task.setvariable variable=APPLICATION_RESTRICTED_SIGNING_KEY_PATH]'"$APPLICATION_RESTRICTED_SIGNING_KEY_PATH"
-      echo '##vso[task.setvariable variable=PRIVILEGED_ACCESS_SIGNING_KEY_PATH]'"$PRIVILEGED_ACCESS_SIGNING_KEY_PATH"
-      echo '##vso[task.setvariable variable=APPLICATION_RESTRICTED_WITH_ASID_SIGNING_KEY_PATH]'"$APPLICATION_RESTRICTED_WITH_ASID_SIGNING_KEY_PATH"
-      echo '##vso[task.setvariable variable=APPLICATION_RESTRICTED_API_KEY]'"$APPLICATION_RESTRICTED_API_KEY"
-      echo '##vso[task.setvariable variable=PRIVILEGED_ACCESS_API_KEY]'"$PRIVILEGED_ACCESS_API_KEY"
-      echo '##vso[task.setvariable variable=APPLICATION_RESTRICTED_WITH_ASID_API_KEY]'"$APPLICATION_RESTRICTED_WITH_ASID_API_KEY"
-      echo '##vso[task.setvariable variable=JWT_PRIVATE_KEY_ABSOLUTE_PATH]'"$JWT_PRIVATE_KEY_ABSOLUTE_PATH"
-      echo '##vso[task.setvariable variable=ID_TOKEN_NHS_LOGIN_PRIVATE_KEY_ABSOLUTE_PATH]'"$ID_TOKEN_NHS_LOGIN_PRIVATE_KEY_ABSOLUTE_PATH"
-      echo '##vso[task.setvariable variable=AUTH_TOKEN_EXPIRY_MS]'"$AUTH_TOKEN_EXPIRY_MS"
-      echo '##vso[task.setvariable variable=AUTH_TOKEN_EXPIRY_MS_INT]'"$AUTH_TOKEN_EXPIRY_MS_INT"
+      echo "##vso[task.setvariable variable=EMPTY_ADDRESS_LINES_CLIENT_ID]$EMPTY_ADDRESS_LINES_CLIENT_ID"
+      echo "##vso[task.setvariable variable=EMPTY_ADDRESS_LINES_CLIENT_SECRET]$EMPTY_ADDRESS_LINES_CLIENT_SECRET"
+      echo "##vso[task.setvariable variable=CONFIDENTIAL_REMOVAL_REASONS_CLIENT_ID]$CONFIDENTIAL_REMOVAL_REASONS_CLIENT_ID"
+      echo "##vso[task.setvariable variable=CONFIDENTIAL_REMOVAL_REASONS_CLIENT_SECRET]$CONFIDENTIAL_REMOVAL_REASONS_CLIENT_SECRET"
+      echo "##vso[task.setvariable variable=RECORD_SHARING_CONSENT_APP_CLIENT_ID]$RECORD_SHARING_CONSENT_APP_CLIENT_ID"
+      echo "##vso[task.setvariable variable=RECORD_SHARING_CONSENT_APP_CLIENT_SECRET]$RECORD_SHARING_CONSENT_APP_CLIENT_SECRET"
+      echo "##vso[task.setvariable variable=TEST_PATIENT_ID]$TEST_PATIENT_ID"
+      echo "##vso[task.setvariable variable=APPLICATION_RESTRICTED_SIGNING_KEY_PATH]$APPLICATION_RESTRICTED_SIGNING_KEY_PATH"
+      echo "##vso[task.setvariable variable=PRIVILEGED_ACCESS_SIGNING_KEY_PATH]$PRIVILEGED_ACCESS_SIGNING_KEY_PATH"
+      echo "##vso[task.setvariable variable=APPLICATION_RESTRICTED_WITH_ASID_SIGNING_KEY_PATH]$APPLICATION_RESTRICTED_WITH_ASID_SIGNING_KEY_PATH"
+      echo "##vso[task.setvariable variable=APPLICATION_RESTRICTED_API_KEY]$APPLICATION_RESTRICTED_API_KEY"
+      echo "##vso[task.setvariable variable=PRIVILEGED_ACCESS_API_KEY]$PRIVILEGED_ACCESS_API_KEY"
+      echo "##vso[task.setvariable variable=APPLICATION_RESTRICTED_WITH_ASID_API_KEY]$APPLICATION_RESTRICTED_WITH_ASID_API_KEY"
+      echo "##vso[task.setvariable variable=JWT_PRIVATE_KEY_ABSOLUTE_PATH]$JWT_PRIVATE_KEY_ABSOLUTE_PATH"
+      echo "##vso[task.setvariable variable=ID_TOKEN_NHS_LOGIN_PRIVATE_KEY_ABSOLUTE_PATH]$ID_TOKEN_NHS_LOGIN_PRIVATE_KEY_ABSOLUTE_PATH"
+      echo "##vso[task.setvariable variable=AUTH_TOKEN_EXPIRY_MS]$AUTH_TOKEN_EXPIRY_MS"
+      echo "##vso[task.setvariable variable=AUTH_TOKEN_EXPIRY_MS_INT]$AUTH_TOKEN_EXPIRY_MS_INT"
       echo '##vso[task.setvariable variable=REDIRECT_URI]https://example.org/callback'
       echo '##vso[task.setvariable variable=APIGEE_API_TOKEN]$(secret.AccessToken)'
       if [ -z "$SERVICE_ARTIFACT_NAME" ]; then
-        echo '##vso[task.setvariable variable=ARTIFACT_PATH]'"$PIPELINE_WORKSPACE"'/s/'
+        echo "##vso[task.setvariable variable=ARTIFACT_PATH]$PIPELINE_WORKSPACE/s/"
       else
-        echo '##vso[task.setvariable variable=ARTIFACT_PATH]'"$PIPELINE_WORKSPACE"'/s/'"$SERVICE_NAME"'/'"$SERVICE_ARTIFACT_NAME"'/'
+        echo "##vso[task.setvariable variable=ARTIFACT_PATH]$PIPELINE_WORKSPACE/s/$SERVICE_NAME/$SERVICE_ARTIFACT_NAME/"
       fi
     displayName: Expose common variables
     env:
