@@ -25,6 +25,7 @@ scenario = partial(pytest_bdd.scenario, './features/post_patient.feature')
 def test_post_patient_rate_limit():
     pass
 
+
 @scenario('The rate limit is tripped when POSTing to create record at birth endpoint(>3tps)')
 def test_post_create_record_at_birth_rate_limit():
     pass
@@ -176,8 +177,12 @@ def post_patient_multiple_times(healthcare_worker_auth_headers: dict, pds_url: s
 
     return _post_multiple_times(healthcare_worker_auth_headers, url, body)
 
+
 @pytest.mark.asyncio
-@when("I post to the create record at birth endpoint more than 3 times per second", target_fixture='post_results')
+@when(
+    "I post to the create record at birth endpoint more than 3 times per second",
+    target_fixture='post_results'
+)
 def post_create_record_at_birth_multiple_times(healthcare_worker_auth_headers: dict, pds_url: str) -> list:
     url = f'{pds_url}/Patient/$process-birth-details'
     body = json.dumps({"createRecordAtBirth": "Done"})
