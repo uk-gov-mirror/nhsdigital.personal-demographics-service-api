@@ -25,6 +25,10 @@ scenario = partial(pytest_bdd.scenario, './features/post_patient.feature')
 def test_post_patient_rate_limit():
     pass
 
+@scenario('The rate limit is tripped when POSTing to create record at birth endpoint(>3tps)')
+def test_post_create_record_at_birth_rate_limit():
+    pass
+
 
 # FIXTURES------------------------------------------------------------------------------------------------------
 @pytest.fixture(scope='function')
@@ -114,8 +118,8 @@ async def _create_patient(session, headers, url, body):
         return details
 
 
-async def _create_all_patients(headers, url, body, loop, num_patients):
-    conn = aiohttp.TCPConnector(limit=3)
+async def _create_all_patients(headers, url, body, loop, num_patients, connector_limit=3):
+    conn = aiohttp.TCPConnector(limit=connector_limit)
     async with aiohttp.ClientSession(connector=conn, loop=loop) as session:
         results = await asyncio.gather(
             *[_create_patient(session, headers, url, body) for _ in range(num_patients)],
@@ -124,23 +128,28 @@ async def _create_all_patients(headers, url, body, loop, num_patients):
         return results
 
 
-# STEPS----------------------------------------------------------------------------------------------------------
-# ---------------------------------------------------------------------------------------------------------------
-# WHEN------------------------------------------------------------------------------------------------------------
-@pytest.mark.asyncio
-@when("I post to the Patient endpoint more than 3 times per second", target_fixture='post_results')
-def post_patient_multiple_times(healthcare_worker_auth_headers: dict, pds_url: str) -> list:
+def _post_multiple_times(
+    healthcare_worker_auth_headers: dict,
+    url: str,
+    body: str,
+    connector_limit: int = 3,
+) -> list:
     # firing 40 requests in 10 seconds should trigger the spike arrest policy
     patients_to_create = 40
     target_time_between_first_and_last_request = 10
 
-    url = f'{pds_url}/Patient'
-    body = json.dumps({"nhsNumberAllocation": "Done"})
-
     loop = asyncio.new_event_loop()
     results = loop.run_until_complete(
-        _create_all_patients(healthcare_worker_auth_headers, url, body, loop, patients_to_create)
+        _create_all_patients(
+            healthcare_worker_auth_headers,
+            url,
+            body,
+            loop,
+            patients_to_create,
+            connector_limit=connector_limit
+        )
     )
+
     request_times = [x['request_time'] for x in results]
     request_times.sort()
     elapsed_time_req = request_times[-1] - request_times[0]
@@ -154,6 +163,31 @@ def post_patient_multiple_times(healthcare_worker_auth_headers: dict, pds_url: s
     assert actual_time_between_first_and_last_request.seconds <= target_time_between_first_and_last_request
 
     return results
+
+
+# STEPS----------------------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------------------------
+# WHEN------------------------------------------------------------------------------------------------------------
+@pytest.mark.asyncio
+@when("I post to the Patient endpoint more than 3 times per second", target_fixture='post_results')
+def post_patient_multiple_times(healthcare_worker_auth_headers: dict, pds_url: str) -> list:
+    url = f'{pds_url}/Patient'
+    body = json.dumps({"nhsNumberAllocation": "Done"})
+
+    return _post_multiple_times(healthcare_worker_auth_headers, url, body)
+
+@pytest.mark.asyncio
+@when("I post to the create record at birth endpoint more than 3 times per second", target_fixture='post_results')
+def post_create_record_at_birth_multiple_times(healthcare_worker_auth_headers: dict, pds_url: str) -> list:
+    url = f'{pds_url}/Patient/$process-birth-details'
+    body = json.dumps({"createRecordAtBirth": "Done"})
+
+    return _post_multiple_times(
+        healthcare_worker_auth_headers,
+        url,
+        body,
+        connector_limit=40
+    )
 
 
 # THEN------------------------------------------------------------------------------------------------------------
