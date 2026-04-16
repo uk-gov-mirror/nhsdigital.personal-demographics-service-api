@@ -58,7 +58,7 @@ steps:
       echo '##vso[task.setvariable variable=AUTH_TOKEN_EXPIRY_MS]'"$AUTH_TOKEN_EXPIRY_MS"
       echo '##vso[task.setvariable variable=AUTH_TOKEN_EXPIRY_MS_INT]'"$AUTH_TOKEN_EXPIRY_MS_INT"
       echo '##vso[task.setvariable variable=REDIRECT_URI]https://example.org/callback'
-      echo '##vso[task.setvariable variable=APIGEE_API_TOKEN]'"$APIGEE_API_TOKEN"
+      echo '##vso[task.setvariable variable=APIGEE_API_TOKEN]$(secret.AccessToken)'
       if [ -z "$SERVICE_ARTIFACT_NAME" ]; then
         echo '##vso[task.setvariable variable=ARTIFACT_PATH]'"$PIPELINE_WORKSPACE"'/s/'
       else
@@ -89,7 +89,6 @@ steps:
       ID_TOKEN_NHS_LOGIN_PRIVATE_KEY_ABSOLUTE_PATH: $(Pipeline.Workspace)/secrets/$(ID_TOKEN_NHS_LOGIN_PRIVATE_KEY)
       AUTH_TOKEN_EXPIRY_MS: $(AUTH_TOKEN_EXPIRY_MS)
       AUTH_TOKEN_EXPIRY_MS_INT: $(AUTH_TOKEN_EXPIRY_MS_INT)
-      APIGEE_API_TOKEN: $(secret.AccessToken)
       SERVICE_ARTIFACT_NAME: $(SERVICE_ARTIFACT_NAME)
       PIPELINE_WORKSPACE: $(Pipeline.Workspace)
       SERVICE_NAME: $(SERVICE_NAME)
