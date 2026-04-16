@@ -467,7 +467,6 @@ Feature: Create a new PDS record at birth
     * match ethnicityExtension != null
     * match ethnicityExtension.extension[0].url == '#present'
     * match ethnicityExtension.extension[0].url ==  'https://fhir.hl7.org.uk/StructureDefinition/Extension-UKCore-EthnicCategory' 
- @sandbox
   Scenario: create  PDS record at birth - Mother gender is male and age is out of range- response should still be 201 created and warning should be returned in the response body
     # create a mother with male gender
     * def givenName = ["#(faker.givenName())", "#(faker.givenName())"]
