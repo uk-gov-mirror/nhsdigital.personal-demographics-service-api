@@ -32,7 +32,7 @@ jobs:
       - name: Check ticket name conforms to requirements
         env:
           PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
-        run: printf '%s\n' "$PR_HEAD_REF" | grep -i -E -q "(apm-[0-9]+)|(apmspii-[0-9]+)|(adz-[0-9]+)|(amb-[0-9]+)|(dos-[0-9]+)|(amp-[0-9]+)|(spinedem-[0-9]+)|(dependabot\/)"
+        run: echo "$PR_HEAD_REF" | grep -i -E -q "(apm-[0-9]+)|(apmspii-[0-9]+)|(adz-[0-9]+)|(amb-[0-9]+)|(dos-[0-9]+)|(amp-[0-9]+)|(spinedem-[0-9]+)|(dependabot\/)"
 
       - name: Grab ticket name
         id: grab_ticket_name
@@ -40,12 +40,8 @@ jobs:
         env:
           PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
         run: |
-          printf '%s\n' "$PR_HEAD_REF" |
-            grep -i -o '\(apm-[0-9]\+\)\|\(apmspii-[0-9]\+\)\|\(adz-[0-9]\+\)\|\(dos-[0-9]\+\)\|\(spinedem-[0-9]\+\)' |
-            tr '[:lower:]' '[:upper:]' |
-            while IFS= read -r ticket_name; do
-              echo "ticket_name=$ticket_name" >> "$GITHUB_OUTPUT"
-            done
+          ticket_name=$(echo "$PR_HEAD_REF" | grep -i -o '\(apm-[0-9]\+\)\|\(apmspii-[0-9]\+\)\|\(adz-[0-9]\+\)\|\(dos-[0-9]\+\)\|\(spinedem-[0-9]\+\)' | tr '[:lower:]' '[:upper:]')
+          echo "ticket_name=$ticket_name" >> "$GITHUB_OUTPUT"
 
       - name: Comment on PR with link to JIRA ticket
         if: contains(github.event.pull_request.head.ref, 'apm-') || contains(github.event.pull_request.head.ref, 'APM-') || contains(github.event.pull_request.head.ref, 'apmspii-') || contains(github.event.pull_request.head.ref, 'APMSPII-') || contains(github.event.pull_request.head.ref, 'adz-') || contains(github.event.pull_request.head.ref, 'ADZ-') || contains(github.event.pull_request.head.ref, 'amb-') || contains(github.event.pull_request.head.ref, 'AMB-') || contains(github.event.pull_request.head.ref, 'dos-') || contains(github.event.pull_request.head.ref, 'DOS-') || contains(github.event.pull_request.head.ref, 'spinedem-') || contains(github.event.pull_request.head.ref, 'SPINEDEM-')
