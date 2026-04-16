@@ -16,7 +16,7 @@
       {% if RATE_LIMIT_POST %}
       <Step>
         <Name>SpikeArrest.PatientCreate</Name>
-        <Condition>request.verb == "POST" AND (proxy.pathsuffix MatchesPath "/Patient/**")</Condition>
+        <Condition>request.verb == "POST" AND ((proxy.pathsuffix MatchesPath "/Patient") OR (proxy.pathsuffix MatchesPath "/Patient/$process-birth-details"))</Condition>
       </Step>
       {% endif %}
       <Step>
