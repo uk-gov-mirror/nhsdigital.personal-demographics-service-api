@@ -23,11 +23,13 @@ scenario = partial(pytest_bdd.scenario, './features/post_patient.feature')
 
 @scenario('The rate limit is tripped when POSTing new Patients (>3tps)')
 def test_post_patient_rate_limit():
+    # Intentionally empty: pytest-bdd links this scenario to step definitions at runtime.
     pass
 
 
 @scenario('The rate limit is tripped when POSTing to create record at birth endpoint(>3tps)')
 def test_post_create_record_at_birth_rate_limit():
+    # Intentionally empty: pytest-bdd links this scenario to step definitions at runtime.
     pass
 
 
