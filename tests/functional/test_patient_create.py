@@ -187,12 +187,7 @@ def post_create_record_at_birth_multiple_times(healthcare_worker_auth_headers: d
     url = f'{pds_url}/Patient/$process-birth-details'
     body = json.dumps({"createRecordAtBirth": "Done"})
 
-    return _post_multiple_times(
-        healthcare_worker_auth_headers,
-        url,
-        body,
-        connector_limit=40
-    )
+    return _post_multiple_times(healthcare_worker_auth_headers,url,body)
 
 
 # THEN------------------------------------------------------------------------------------------------------------
