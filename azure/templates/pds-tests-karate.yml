@@ -3,7 +3,7 @@ steps:
   - task: Npm@1
     inputs:
       command: 'custom'
-      customCommand: 'install -g @stoplight/prism-cli'
+      customCommand: 'install -g @stoplight/prism-cli@5.14.2'
 
   - template: "expose-pds-variables-and-commands.yml"
 
