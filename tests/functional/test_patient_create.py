@@ -134,7 +134,7 @@ async def _create_all_patients(headers, url, body, loop, num_patients, connector
 def _post_multiple_times(
     healthcare_worker_auth_headers: dict,
     url: str,
-    body: str,
+    body: dict,
     connector_limit: int = 3,
 ) -> list:
     # firing 40 requests in 10 seconds should trigger the spike arrest policy
@@ -142,16 +142,20 @@ def _post_multiple_times(
     target_time_between_first_and_last_request = 10
 
     loop = asyncio.new_event_loop()
-    results = loop.run_until_complete(
-        _create_all_patients(
-            healthcare_worker_auth_headers,
-            url,
-            body,
-            loop,
-            patients_to_create,
-            connector_limit=connector_limit
+    asyncio.set_event_loop(loop)
+    try:
+        results = loop.run_until_complete(
+            _create_all_patients(
+                healthcare_worker_auth_headers,
+                url,
+                body,
+                loop,
+                patients_to_create,
+                connector_limit=connector_limit
+            )
         )
-    )
+    finally:
+        loop.close()
 
     request_times = [x['request_time'] for x in results]
     request_times.sort()
@@ -175,7 +179,7 @@ def _post_multiple_times(
 @when("I post to the Patient endpoint more than 3 times per second", target_fixture='post_results')
 def post_patient_multiple_times(healthcare_worker_auth_headers: dict, pds_url: str) -> list:
     url = f'{pds_url}/Patient'
-    body = json.dumps({"nhsNumberAllocation": "Done"})
+    body = {"nhsNumberAllocation": "Done"}
 
     return _post_multiple_times(healthcare_worker_auth_headers, url, body)
 
@@ -187,7 +191,7 @@ def post_patient_multiple_times(healthcare_worker_auth_headers: dict, pds_url: s
 )
 def post_create_record_at_birth_multiple_times(healthcare_worker_auth_headers: dict, pds_url: str) -> list:
     url = f'{pds_url}/Patient/$process-birth-details'
-    body = json.dumps({"createRecordAtBirth": "Done"})
+    body = {"createRecordAtBirth": "Done"}
 
     return _post_multiple_times(healthcare_worker_auth_headers, url, body)
 
