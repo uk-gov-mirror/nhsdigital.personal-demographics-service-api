@@ -10,7 +10,7 @@ Scenario: Create patient
   * def patientPayload = karate.get('patientPayload', read('classpath:patients/healthcareWorker/createPatient/post-patient-request.json'))
   * request patientPayload
   * configure retry = { count: 5, interval: 5000 }
-  * retry until responseStatus != 429 && responseStatus != 503
+  * retry until responseStatus != 429 && responseStatus != 503 && responseStatus != 502
   * method post
   * match responseStatus == expectedStatus
 
@@ -20,6 +20,6 @@ Scenario: Create patient
   * def patientPayload = karate.get('patientPayload', read('classpath:patients/healthcareWorker/createPatient/patient-create-maximal.json'))
   * request patientPayload
   * configure retry = { count: 5, interval: 5000 }
-  * retry until responseStatus != 429 && responseStatus != 503
+  * retry until responseStatus != 429 && responseStatus != 503 && responseStatus != 502
   * method post
   * match responseStatus == expectedStatus  
