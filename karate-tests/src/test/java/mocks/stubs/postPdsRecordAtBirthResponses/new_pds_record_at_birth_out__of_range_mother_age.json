@@ -93,6 +93,34 @@
                             },
                             "diagnostics": "Failed to link to mother's record - mother's age out of valid range.",
                             "severity": "warning"
+                        },
+                        {
+                            "code": "business-rule",
+                            "details": {
+                                "coding": [
+                                    {
+                                        "code": "INVALID_UPDATE",
+                                        "display": "Parent links business violation.",
+                                        "system": "https://fhir.nhs.uk/R4/CodeSystem/Spine-ErrorOrWarningCode"
+                                    }
+                                ]
+                            },
+                            "diagnostics": "Failed to link to mother's record - mother's gender is male.",
+                            "severity": "warning"
+                        },
+                        {
+                            "code": "business-rule",
+                            "details": {
+                                "coding": [
+                                    {
+                                        "code": "INVALID_UPDATE",
+                                        "display": "Parent links business violation.",
+                                        "system": "https://fhir.nhs.uk/R4/CodeSystem/Spine-ErrorOrWarningCode"
+                                    }
+                                ]
+                            },
+                            "diagnostics": "Failed to link to mother's record.",
+                            "severity": "warning"
                         }
                     ],
                     "resourceType": "OperationOutcome"

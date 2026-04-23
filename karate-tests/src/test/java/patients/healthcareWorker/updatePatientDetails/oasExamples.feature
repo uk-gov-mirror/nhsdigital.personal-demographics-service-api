@@ -11,6 +11,7 @@ Feature: Update patient's record - OAS file examples
     * configure headers = requestHeaders 
     * url baseURL
     * def nhsNumber = '9000000033'
+    * retry until responseStatus != 429 && responseStatus != 503 && responseStatus != 502
     * path 'Patient', nhsNumber
     * method get
     * status 200
