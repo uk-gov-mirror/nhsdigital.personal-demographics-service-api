@@ -243,8 +243,8 @@
             "coding": [
               {
                 "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
-                "code": "GESTM",
-                "display": "Gestational mother"
+                "code": "MTH",
+                "display": "Mother"
               }
             ]
           }
@@ -340,7 +340,7 @@
         "resourceType": "CareTeam",
         "status": "active",
         "subject": {
-          "reference": "urn:uuid:c61b5c90-042b-4015-a1df-0d66868c80e1"
+          "reference": "urn:uuid:ef284d00-6e83-44b4-aab1-bcfa6f293545"
         },
         "participant": [
           {
